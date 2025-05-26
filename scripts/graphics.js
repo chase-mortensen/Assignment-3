@@ -841,6 +841,84 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         };
     }
 
+    //------------------------------------------------------------------
+    //
+    // Translates a primitive of the form: {
+    //    verts: [],    // Must have at least 2 verts
+    //    center: { x, y }
+    // }
+    //
+    // distance: { x, y }
+    //
+    //------------------------------------------------------------------
+    function translatePrimitive(primitive, distance) {
+
+    }
+
+    //------------------------------------------------------------------
+    //
+    // Scales a primitive of the form: {
+    //    verts: [],    // Must have at least 2 verts
+    //    center: { x, y }
+    // }
+    //
+    // scale: { x, y }
+    //
+    //------------------------------------------------------------------
+    function scalePrimitive(primitive, scale) {
+
+    }
+
+    //------------------------------------------------------------------
+    //
+    // Rotates a primitive of the form: {
+    //    verts: [],    // Must have at least 2 verts
+    //    center: { x, y }
+    // }
+    //
+    // angle: radians
+    //
+    //------------------------------------------------------------------
+    function rotatePrimitive(primitive, angle) {
+
+    }
+
+    //------------------------------------------------------------------
+    //
+    // Translates a curve.
+    //    type: Cardinal, Bezier
+    //    controls: appropriate to the curve type
+    //    distance: { x, y }
+    //
+    //------------------------------------------------------------------
+    function translateCurve(type, controls, distance) {
+
+    }
+
+    //------------------------------------------------------------------
+    //
+    // Scales a curve relative to its center.
+    //    type: Cardinal, Bezier
+    //    controls: appropriate to the curve type
+    //    scale: { x, y }
+    //
+    //------------------------------------------------------------------
+    function scaleCurve(type, controls, scale) {
+
+    }
+
+    //------------------------------------------------------------------
+    //
+    // Rotates a curve about its center.
+    //    type: Cardinal, Bezier
+    //    controls: appropriate to the curve type
+    //    angle: radians
+    //
+    //------------------------------------------------------------------
+    function rotateCurve(type, controls, angle) {
+
+    }
+
     //
     // This is what we'll export as the rendering API
     const api = {
@@ -848,7 +926,13 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         drawPixel: drawPixel,
         drawLine: drawLine,
         drawCurve: drawCurve,
-        drawPrimitive
+        drawPrimitive: drawPrimitive,
+        translatePrimitive: translatePrimitive,
+        scalePrimitive: scalePrimitive,
+        rotatePrimitive: rotatePrimitive,
+        translateCurve: translateCurve,
+        scaleCurve: scaleCurve,
+        rotateCurve: rotateCurve
     };
 
     Object.defineProperty(api, 'sizeX', {

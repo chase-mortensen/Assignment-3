@@ -738,7 +738,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //------------------------------------------------------------------
     function drawPrimitive(primitive, connect, color) {
         if (!validatePrimitive(primitive)) {
-            console.error("(translatePrimitive) Invalid vertices: ", primitive)
+            console.error("(drawPrimitive) Invalid primitive: ", primitive)
             return null
         }
 
@@ -849,7 +849,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //------------------------------------------------------------------
     function translatePrimitive(primitive, distance) {
         if (!validatePrimitive(primitive)) {
-            console.error("(translatePrimitive) Invalid vertices: ", primitive)
+            console.error("(translatePrimitive) Invalid primitive: ", primitive)
             return null
         }
 
@@ -882,9 +882,39 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     // scale: { x, y }
     //
+    // translate to origin
+    // scale
+    // translate back
+    //
     //------------------------------------------------------------------
     function scalePrimitive(primitive, scale) {
+        if (!validatePrimitive(primitive)) {
+            console.error("(scalePrimitive) Invalid primitive: ", primitive)
+            return null
+        }
 
+        if (!validatePoint(scale)) {
+            console.error("(scalePrimitive) Invalid distance: ", scale)
+            return null
+        }
+
+        const translation = getReverseTranslation(primitive.center)
+
+        translatedPrimitive = translatePrimitive(primitive, translation)
+
+        translatedPrimitive.verts = translatedPrimitive.verts.map(vertex => ({
+            x: vertex.x * scale.x,
+            y: vertex.y * scale.y
+        }))
+
+        const translateBack = getReverseTranslation(translation)
+
+        updatedPrimitive = translatePrimitive(translatedPrimitive, translateBack)
+
+        return {
+            verts: scaledVerts,
+            center: scaledCenter
+        }
     }
 
     //------------------------------------------------------------------
@@ -944,7 +974,6 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
 
     function validatePrimitive(primitive) {
         if (!primitive?.verts || primitive.verts.length < 2) {
-            console.error("(validatePrimitive) Invalid vertices: ", primitive)
             return false
         }
 
@@ -955,6 +984,13 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
             }
         }
         return true
+    }
+
+    function getReverseTranslation(distance) {
+        return {
+            x: -distance.x,
+            y: -distance.y
+        }
     }
 
     //

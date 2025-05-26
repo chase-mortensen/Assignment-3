@@ -737,15 +737,9 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     //------------------------------------------------------------------
     function drawPrimitive(primitive, connect, color) {
-        if (!primitive?.verts || primitive.verts.length < 2) {
-            return false
-        }
-
-        for (const point of primitive.verts) {
-            if (!validatePoint(point)) {
-                console.log('(drawPrimitive) invalid point: ', point)
-                return false
-            }
+        if (!validatePrimitive(primitive)) {
+            console.error("(translatePrimitive) Invalid vertices: ", primitive)
+            return null
         }
 
         for (let i = 0; i < primitive.verts.length - 1; i++) {
@@ -854,7 +848,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     //------------------------------------------------------------------
     function translatePrimitive(primitive, distance) {
-        if (!primitive?.verts || primitive.verts.length < 2) {
+        if (!validatePrimitive(primitive)) {
             console.error("(translatePrimitive) Invalid vertices: ", primitive)
             return null
         }
@@ -862,13 +856,6 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         if (!validatePoint(distance)) {
             console.error("(translatePrimitive) Invalid distance: ", distance)
             return null
-        }
-
-        for (const point of primitive.verts) {
-            if (!validatePoint(point)) {
-                console.error("(translatePrimitive) Invalid point: ", point)
-                return null
-            }
         }
 
         const translatedVerts = primitive.verts.map(vertex =>
@@ -951,8 +938,23 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     }
 
     // Helpers
-    function validatePoint(p) {
+    function validatePoint(point) {
         return !p || typeof p.x !== 'number' || typeof p.y !== 'number'
+    }
+
+    function validatePrimitive(primitive) {
+        if (!primitive?.verts || primitive.verts.length < 2) {
+            console.error("(validatePrimitive) Invalid vertices: ", primitive)
+            return false
+        }
+
+        for (const point of primitive.verts) {
+            if (!validatePoint(point)) {
+                console.error("(validatePrimitive) Invalid point: ", point)
+                return false
+            }
+        }
+        return true
     }
 
     //

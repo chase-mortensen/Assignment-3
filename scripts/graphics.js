@@ -817,6 +817,30 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         }
     }
 
+    //------------------------------------------------------------------
+    //
+    // Translates a point of the form: { x, y }
+    //
+    // distance: { x, y }
+    //
+    //------------------------------------------------------------------
+    function translatePoint(point, distance) {
+        if (!point || typeof point.x !== 'number' || typeof point.y !== 'number') {
+            console.error("translatePoint: Invalid point");
+            return null;
+        }
+
+        if (!distance || typeof distance.x !== 'number' || typeof distance.y !== 'number') {
+            console.error("translatePoint: Invalid distance");
+            return null;
+        }
+
+        return {
+            x: point.x + distance.x,
+            y: point.y + distance.y
+        };
+    }
+
     //
     // This is what we'll export as the rendering API
     const api = {

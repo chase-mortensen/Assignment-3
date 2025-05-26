@@ -966,7 +966,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
 
     // Helpers
     function validatePoint(point) {
-        return !p || typeof p.x !== 'number' || typeof p.y !== 'number'
+        return !point || typeof point.x !== 'number' || typeof point.y !== 'number'
     }
 
     function validatePrimitive(primitive) {

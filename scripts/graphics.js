@@ -899,22 +899,19 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         }
 
         const translation = getReverseTranslation(primitive.center)
+        const translatedPrimitive = translatePrimitive(primitive, translation)
 
-        translatedPrimitive = translatePrimitive(primitive, translation)
-
-        translatedPrimitive.verts = translatedPrimitive.verts.map(vertex => ({
+        const scaledVerts = translatedPrimitive.verts.map(vertex => ({
             x: vertex.x * scale.x,
             y: vertex.y * scale.y
         }))
 
         const translateBack = getReverseTranslation(translation)
-
-        updatedPrimitive = translatePrimitive(translatedPrimitive, translateBack)
-
-        return {
+        const scaledPrimitive = {
             verts: scaledVerts,
-            center: scaledCenter
+            center: translatedPrimitive.center
         }
+        return translatePrimitive(scaledPrimitive, translateBack)
     }
 
     //------------------------------------------------------------------

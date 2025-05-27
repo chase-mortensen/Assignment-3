@@ -1091,6 +1091,42 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         return finalPoints
     }
 
+    function scaleCurveOptimized(type, controls, scale) {
+        if (!validatePoint(scale)) {
+            console.error("(scaleCurveOptimized) Invalid scale: ", scale)
+            return controls
+        }
+
+        const points = type === api.Curve.Cardinal ? controls.points : controls
+
+        if (!Array.isArray(points) || !validatePoints(points)) {
+            console.error("(scaleCurveOptimized) Invalid points: ", points)
+            return controls
+        }
+
+        const center = calculateCurveCenter(points)
+
+        const cx = center.x
+        const cy = center.y
+        const sx = scale.x
+        const sy = scale.y
+        const tx = cx * (1 - sx) // Translation for x
+        const ty = cy * (1 - sy) // Translation for y
+
+        const scaledPoints = points.map(p => ({
+            x: sx * p.x + tx,
+            y: sy * p.y + ty
+        }))
+
+        if (type === api.Curve.Cardinal) {
+            return {
+                ...controls,
+                points: scaledPoints
+            }
+        }
+        return scaledPoints
+    }
+
     //------------------------------------------------------------------
     //
     // Rotates a curve about its center.
@@ -1100,7 +1136,40 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     //------------------------------------------------------------------
     function rotateCurve(type, controls, angle) {
+        if (typeof angle !== 'number') {
+            console.error("(rotateCurve) Invalid angle: ", angle)
+            return controls
+        }
 
+        const points = type === api.Curve.Cardinal ? controls.points : controls
+
+        if (!Array.isArray(points) || !validatePoints(points)) {
+            console.error("(rotateCurve) Invalid points: ", points)
+            return controls
+        }
+
+        const center = calculateCurveCenter(points)
+
+        const translation = getReverseTranslation(center)
+        const translatedPoints = points.map(p => translatePoint(p, translation))
+
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+        const rotatedPoints = translatedPoints.map(p => ({
+            x: cos * p.x - sin * p.y,
+            y: sin * p.x + cos * p.y
+        }))
+
+        const translateBack = getReverseTranslation(translation)
+        const finalPoints = rotatedPoints.map(p => translatePoint(p, translateBack))
+
+        if (type === api.Curve.Cardinal) {
+            return {
+                ...controls,
+                points: finalPoints
+            }
+        }
+        return finalPoints
     }
 
     //------------------------------------------------------------------
@@ -1140,6 +1209,22 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         }
     }
 
+    function calculateCurveCenter(points) {
+        if (!points || points.length === 0) {
+            return { x: 0, y: 0 }
+        }
+
+        const sum = points.reduce((acc, point) => ({
+            x: acc.x + point.x,
+            y: acc.y + point.y
+        }), { x: 0, y: 0 })
+
+        return {
+            x: Math.trunc(sum.x / points.length),
+            y: Math.trunc(sum.y / points.length)
+        }
+    }
+
     //------------------------------------------------------------------
     //
     // Rendering API
@@ -1155,7 +1240,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         scalePrimitive: scalePrimitiveOptimized,    // or scalePrimitive
         rotatePrimitive: rotatePrimitiveOptimized,  // or rotatePrimitive
         translateCurve: translateCurve,
-        scaleCurve: scaleCurve,
+        scaleCurve: scaleCurveOptimized,            // or scaleCurve
         rotateCurve: rotateCurve
     }
 

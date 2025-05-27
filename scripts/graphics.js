@@ -1172,6 +1172,43 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         return finalPoints
     }
 
+    function rotateCurveOptimized(type, controls, angle) {
+        if (typeof angle !== 'number') {
+            console.error("(rotateCurveOptimized) Invalid angle: ", angle)
+            return controls
+        }
+
+        const points = type === api.Curve.Cardinal ? controls.points : controls
+
+        if (!Array.isArray(points) || !validatePoints(points)) {
+            console.error("(rotateCurveOptimized) Invalid points: ", points)
+            return controls
+        }
+
+        const center = calculateCurveCenter(points)
+
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+
+        const cx = center.x
+        const cy = center.y
+        const tx = cx * (1 - cos) + cy * sin  // Translation for x
+        const ty = cy * (1 - cos) - cx * sin  // Translation for y
+
+        const rotatedPoints = points.map(p => ({
+            x: cos * p.x - sin * p.y + tx,
+            y: sin * p.x + cos * p.y + ty
+        }))
+
+        if (type === api.Curve.Cardinal) {
+            return {
+                ...controls,
+                points: rotatedPoints
+            }
+        }
+        return rotatedPoints
+    }
+
     //------------------------------------------------------------------
     //
     // Helpers
@@ -1241,7 +1278,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         rotatePrimitive: rotatePrimitiveOptimized,  // or rotatePrimitive
         translateCurve: translateCurve,
         scaleCurve: scaleCurveOptimized,            // or scaleCurve
-        rotateCurve: rotateCurve
+        rotateCurve: rotateCurveOptimized           // or rotateCurve
     }
 
     Object.defineProperty(api, 'sizeX', {

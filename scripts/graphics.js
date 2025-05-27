@@ -853,12 +853,12 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     function translatePrimitive(primitive, distance) {
         if (!validatePrimitive(primitive)) {
             console.error("(translatePrimitive) Invalid primitive: ", primitive)
-            return
+            return primitive
         }
 
         if (!validatePoint(distance)) {
             console.error("(translatePrimitive) Invalid distance: ", distance)
-            return
+            return primitive
         }
 
         const translatedVerts = primitive.verts.map(vertex =>
@@ -888,12 +888,12 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     function scalePrimitive(primitive, scale) {
         if (!validatePrimitive(primitive)) {
             console.error("(scalePrimitive) Invalid primitive: ", primitive)
-            return
+            return primitive
         }
 
         if (!validatePoint(scale)) {
             console.error("(scalePrimitive) Invalid distance: ", scale)
-            return
+            return primitive
         }
 
         const translation = getReverseTranslation(primitive.center)
@@ -915,12 +915,12 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     function scalePrimitiveOptimized(primitive, scale) {
         if (!validatePrimitive(primitive)) {
             console.error("(scalePrimitive) Invalid primitive: ", primitive)
-            return
+            return primitive
         }
 
         if (!validatePoint(scale)) {
             console.error("(scalePrimitive) Invalid scale: ", scale)
-            return
+            return primitive
         }
 
         const cx = primitive.center.x
@@ -958,12 +958,12 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     function rotatePrimitive(primitive, angle) {
         if (!validatePrimitive(primitive)) {
             console.error("(rotatePrimitive) Invalid primitive: ", primitive)
-            return
+            return primitive
         }
 
         if (typeof angle !== 'number') {
             console.error("(rotatePrimitive) Invalid angle: ", angle)
-            return
+            return primitive
         }
 
         const translation = getReverseTranslation(primitive.center)
@@ -1027,6 +1027,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     function translateCurve(type, controls, distance) {
         if (!validatePoint(distance)) {
             console.error("(translateCurve) Invalid distance: ", distance)
+            return controls
         }
 
         const points = type === api.Curve.Cardinal ? controls.points : controls
@@ -1056,7 +1057,38 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     //------------------------------------------------------------------
     function scaleCurve(type, controls, scale) {
+        if (!validatePoint(scale)) {
+            console.error("(scaleCurve) Invalid scale: ", scale)
+            return controls
+        }
 
+        const points = type === api.Curve.Cardinal ? controls.points : controls
+
+        if (!Array.isArray(points) || !validatePoints(points)) {
+            console.error("(scaleCurve) Invalid points: ", points)
+            return controls
+        }
+
+        const center = calculateCurveCenter(points)
+
+        const translation = getReverseTranslation(center)
+        const translatedPoints = points.map(p => translatePoint(p, translation))
+
+        const scaledPoints = translatedPoints.map(p => ({
+            x: p.x * scale.x,
+            y: p.y * scale.y
+        }))
+
+        const translateBack = getReverseTranslation(translation)
+        const finalPoints = scaledPoints.map(p => translatePoint(p, translateBack))
+
+        if (type === api.Curve.Cardinal) {
+            return {
+                ...controls,
+                points: finalPoints
+            }
+        }
+        return finalPoints
     }
 
     //------------------------------------------------------------------

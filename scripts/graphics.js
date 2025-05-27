@@ -929,8 +929,8 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         const cy = primitive.center.y
         const sx = scale.x
         const sy = scale.y
-        const tx = cx * (1 - sx)  // Translation for x
-        const ty = cy * (1 - sy)  // Translation for y
+        const tx = cx * (1 - sx) // Translation for x
+        const ty = cy * (1 - sy) // Translation for y
 
         const scaledVerts = primitive.verts.map(vertex => ({
             x: sx * vertex.x + tx,
@@ -959,12 +959,12 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     function rotatePrimitive(primitive, angle) {
         if (!validatePrimitive(primitive)) {
             console.error("(rotatePrimitive) Invalid primitive: ", primitive)
-            return null
+            return
         }
 
         if (typeof angle !== 'number') {
             console.error("(rotatePrimitive) Invalid angle: ", angle)
-            return null
+            return
         }
 
         const translation = getReverseTranslation(primitive.center)
@@ -984,6 +984,37 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
             center: translatedPrimitive.center
         }
         return translatePrimitive(rotatedPrimitive, translateBack)
+    }
+
+    function rotatePrimitiveOptimized(primitive, angle) {
+        if (!validatePrimitive(primitive)) {
+            console.error("(rotatePrimitive) Invalid primitive: ", primitive)
+            return
+        }
+
+        if (typeof angle !== 'number') {
+            console.error("(rotatePrimitive) Invalid angle: ", angle)
+            return
+        }
+
+        const cx = primitive.center.x
+        const cy = primitive.center.y
+
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+
+        const tx = cx * (1 - cos) + cy * sin // Translation for x
+        const ty = cy * (1 - cos) - cx * sin // Translation for y
+
+        const rotatedVerts = primitive.verts.map(vertex => ({
+            x: cos * vertex.x - sin * vertex.y + tx,
+            y: sin * vertex.x + cos * vertex.y + ty
+        }))
+
+        return {
+            verts: rotatedVerts,
+            center: primitive.center  // Center stays the same (pivot)
+        }
     }
 
     //------------------------------------------------------------------
@@ -1057,8 +1088,8 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         drawCurve: drawCurve,
         drawPrimitive: drawPrimitive,
         translatePrimitive: translatePrimitive,
-        scalePrimitive: scalePrimitiveOptimized, // or scalePrimitive
-        rotatePrimitive: rotatePrimitive,
+        scalePrimitive: scalePrimitiveOptimized,    // or scalePrimitive
+        rotatePrimitive: rotatePrimitiveOptimized,  // or rotatePrimitive
         translateCurve: translateCurve,
         scaleCurve: scaleCurve,
         rotateCurve: rotateCurve

@@ -1222,7 +1222,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         if (!Array.isArray(points) || points.length === 0) {
             return false
         }
-        return points.every(p => isValidPoint(p))
+        return points.every(p => validatePoint(p))
     }
 
     function validatePrimitive(primitive) {

@@ -952,9 +952,38 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     // angle: radians
     //
+    // translate center to origin
+    // rotate
+    // translate back
     //------------------------------------------------------------------
     function rotatePrimitive(primitive, angle) {
+        if (!validatePrimitive(primitive)) {
+            console.error("(rotatePrimitive) Invalid primitive: ", primitive)
+            return null
+        }
 
+        if (typeof angle !== 'number') {
+            console.error("(rotatePrimitive) Invalid angle: ", angle)
+            return null
+        }
+
+        const translation = getReverseTranslation(primitive.center)
+        const translatedPrimitive = translatePrimitive(primitive, translation)
+
+        const cos = Math.cos(angle)
+        const sin = Math.sin(angle)
+
+        const rotatedVerts = translatedPrimitive.verts.map(vertex => ({
+            x: cos * vertex.x - sin * vertex.y,
+            y: sin * vertex.x + cos * vertex.y
+        }))
+
+        const translateBack = getReverseTranslation(translation)
+        const rotatedPrimitive = {
+            verts: rotatedVerts,
+            center: translatedPrimitive.center
+        }
+        return translatePrimitive(rotatedPrimitive, translateBack)
     }
 
     //------------------------------------------------------------------
@@ -1028,7 +1057,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         drawCurve: drawCurve,
         drawPrimitive: drawPrimitive,
         translatePrimitive: translatePrimitive,
-        scalePrimitive: scalePrimitiveOptimized,
+        scalePrimitive: scalePrimitiveOptimized, // or scalePrimitive
         rotatePrimitive: rotatePrimitive,
         translateCurve: translateCurve,
         scaleCurve: scaleCurve,

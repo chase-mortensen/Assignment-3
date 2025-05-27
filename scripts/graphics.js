@@ -1031,11 +1031,20 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
 
         const points = type === api.Curve.Cardinal ? controls.points : controls
 
-        if (!validatePoints(points)) {
-            return
+        if (!Array.isArray(points) || !validatePoints(points)) {
+            console.log('(validatePoints) invalid points: ', points)
+            return controls
         }
 
-        return points.map(p => translatePoint(p, distance))
+        const translatedPoints = points.map(p => translatePoint(p, distance))
+
+        if (type === api.Curve.Cardinal) {
+            return {
+                ...controls,
+                points: translatedPoints
+            }
+        }
+        return translatedPoints
     }
 
     //------------------------------------------------------------------
@@ -1062,13 +1071,20 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
 
     }
 
+    //------------------------------------------------------------------
+    //
     // Helpers
+    //
+    //------------------------------------------------------------------
     function validatePoint(point) {
-        return !point || typeof point.x !== 'number' || typeof point.y !== 'number'
+        return point && typeof point.x === 'number' && typeof point.y === 'number'
     }
 
     function validatePoints(points) {
-        return points.map(p => validatePoint(p)).every(result => result === true)
+        if (!Array.isArray(points) || points.length === 0) {
+            return false
+        }
+        return points.every(p => isValidPoint(p))
     }
 
     function validatePrimitive(primitive) {
@@ -1092,8 +1108,11 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
         }
     }
 
+    //------------------------------------------------------------------
     //
-    // This is what we'll export as the rendering API
+    // Rendering API
+    //
+    //------------------------------------------------------------------
     const api = {
         clear: clear,
         drawPixel: drawPixel,

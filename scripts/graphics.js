@@ -803,6 +803,9 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     // here.  My goal was to keep it looking Java or C++'ish to keep it familiar
     // to those not experts in JavaScript.
     //
+    // Uses world coordinates - each curve function uses drawLine which now uses
+    // world coordinates, so it's not necessary to make the update here too.
+    //
     //------------------------------------------------------------------
     function drawCurve(type, controls, segments, showPoints, showLine, showControl, lineColor) {
         switch (type) {
@@ -950,6 +953,7 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     // translate center to origin
     // rotate
     // translate back
+    //
     //------------------------------------------------------------------
     function rotatePrimitive(primitive, angle) {
         if (!validatePrimitive(primitive)) {
@@ -1021,7 +1025,17 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     //
     //------------------------------------------------------------------
     function translateCurve(type, controls, distance) {
+        if (!validatePoint(distance)) {
+            console.error("(translateCurve) Invalid distance: ", distance)
+        }
 
+        const points = type === api.Curve.Cardinal ? controls.points : controls
+
+        if (!validatePoints(points)) {
+            return
+        }
+
+        return points.map(p => translatePoint(p, distance))
     }
 
     //------------------------------------------------------------------
@@ -1051,6 +1065,10 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
     // Helpers
     function validatePoint(point) {
         return !point || typeof point.x !== 'number' || typeof point.y !== 'number'
+    }
+
+    function validatePoints(points) {
+        return points.map(p => validatePoint(p)).every(result => result === true)
     }
 
     function validatePrimitive(primitive) {

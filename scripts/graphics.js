@@ -860,16 +860,11 @@ MySample.graphics = (function(pixelsX, pixelsY, showPixels) {
 
         const translatedVerts = primitive.verts.map(vertex =>
             translatePoint(vertex, distance)
-        );
-
-        let translatedCenter = { x: 0, y: 0 } // default center
-        if (primitive.center) {
-            translatedCenter = translatePoint(primitive.center, distance);
-        }
+        )
 
         return {
             verts: translatedVerts,
-            center: translatedCenter
+            center: translatePoint(primitive.center, distance)
         }
     }
 
